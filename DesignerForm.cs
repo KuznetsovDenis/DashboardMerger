@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using DevExpress.DashboardCommon;
 using DevExpress.DashboardWin;
@@ -24,13 +26,18 @@ namespace DashboardMerger {
             if(openFileDialog.ShowDialog() == DialogResult.OK) {
                 dashboardDesigner.Dashboard.BeginUpdate();
                 try {
+                    List<string> rejectedDashboard = new List<string>();
                     foreach(string fileName in openFileDialog.FileNames) {
                         using(Dashboard dashboard = new Dashboard()) {
                             dashboard.LoadFromXml(fileName);
                             DashboardMerger dashboardMerger = new DashboardMerger(dashboardDesigner.Dashboard);
-                            dashboardMerger.MergeDashboard(dashboard);
+                            if(!dashboardMerger.MergeDashboard(dashboard)) {
+                                rejectedDashboard.Add(Path.GetFileName(fileName));
+                            }
                         }
                     }
+                    if(rejectedDashboard.Count > 0)
+                        MessageBox.Show(String.Format("The following dashboard has not been merged{0}{1}", Environment.NewLine, String.Join(Environment.NewLine, rejectedDashboard)));
                 } finally {
                     dashboardDesigner.Dashboard.EndUpdate();
                 }

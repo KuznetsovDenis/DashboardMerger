@@ -79,7 +79,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DashboardMerger.cs" />
+    <Compile Include="DashboardMerger\DashboardMerger.cs" />
+    <Compile Include="DashboardMerger\DataSourceMerger.cs" />
+    <Compile Include="DashboardMerger\ItemsMerger.cs" />
+    <Compile Include="DashboardMerger\LayoutMerger.cs" />
+    <Compile Include="DashboardMerger\MergerBase.cs" />
+    <Compile Include="DashboardMerger\ParametersMerger.cs" />
     <Compile Include="DesignerForm.cs">
       <SubType>Form</SubType>
     </Compile>
