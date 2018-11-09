@@ -40,6 +40,7 @@ namespace DashboardMerger {
                         MessageBox.Show(String.Format("The following dashboard has not been merged{0}{1}", Environment.NewLine, String.Join(Environment.NewLine, rejectedDashboard)));
                 } finally {
                     dashboardDesigner.Dashboard.EndUpdate();
+                    dashboardDesigner.ReloadData();
                 }
             }
         }
