@@ -13,13 +13,22 @@ namespace DashboardMerger {
                 IDashboardDataSource dataSourceCopy = CreateDataSourceCopy(dataSource);
                 if(dataSourceCopy != null) {
                     if(toDataSources.Any(d => d.ComponentName == dataSourceCopy.ComponentName)) {
-                        string newName = NamesGenerator.GenerateName(dataSourceCopy.ComponentName, 1, toDataSources.Select(ds => ds.ComponentName));
-                        dataSourceNamesMap.Add(dataSourceCopy.ComponentName, newName);
-                        dataSourceCopy.ComponentName = newName;
+                        if(ResolveNamesConflict(dataSourceCopy, toDataSources, dataSourceNamesMap))
+                            toDataSources.Add(dataSourceCopy);
+                    } else {
+                        toDataSources.Add(dataSourceCopy);
                     }
-                    toDataSources.Add(dataSourceCopy);
                 }
             }
+        }
+        static bool ResolveNamesConflict(IDashboardDataSource dataSourceCopy, DataSourceCollection toDataSources, IDictionary<string, string> dataSourceNamesMap) {
+            
+            // Provide your data source component names confilict resolution logic here
+
+            string newName = NamesGenerator.GenerateName(dataSourceCopy.ComponentName, 1, toDataSources.Select(ds => ds.ComponentName));
+            dataSourceNamesMap.Add(dataSourceCopy.ComponentName, newName);
+            dataSourceCopy.ComponentName = newName;
+            return true;
         }
         static IDashboardDataSource CreateDataSourceCopy(IDashboardDataSource dataSourceToCopy) {
             DashboardEFDataSource efDataSource = dataSourceToCopy as DashboardEFDataSource;

@@ -27,34 +27,16 @@ namespace DashboardMerger {
             if(!CheckDashboard(dashboard))
                 return false;
             UpdateTabContainer();
-            ParametersMerger.MergeParameters(dashboard.Parameters, this);
             DataSourceMerger.MergeDataSources(dashboard.DataSources, this);
             ItemsMerger.MergeGroups(dashboard.Groups, this);
             ItemsMerger.MergeItems(dashboard.Items, this);
+            ParametersMerger.MergeParameters(dashboard.Parameters, this);
             LayoutMerger.MergeLayout(dashboard.LayoutRoot, dashboard.Title.Text, this);
             return true;
         }
 
         bool CheckDashboard(Dashboard dashboard) {
             return dashboard.Items.All(item => !(item is TabContainerDashboardItem));
-        }
-
-        void CreateTabContainer() {
-            TabContainer = new TabContainerDashboardItem();
-            OriginalDashboard.Items.Add(TabContainer);
-        }
-        void SetParentContainer(IDashboardItemContainer container) {
-            foreach(DashboardItem item in ItemsAndGroups) {
-                if(item.ParentContainer == null) {
-                    if(!(item is TabContainerDashboardItem))
-                        item.ParentContainer = container;
-                }
-            }
-        }
-        void MoveRootToTabPage(DashboardLayoutTabPage layoutPage) {
-            DashboardLayoutGroup rootGroup = OriginalDashboard.LayoutRoot;
-            OriginalDashboard.LayoutRoot = null;
-            layoutPage.ChildNodes.Add(rootGroup);
         }
         void UpdateTabContainer() {
             TabContainer = OriginalDashboard.Items.FirstOrDefault(item => item is TabContainerDashboardItem) as TabContainerDashboardItem;
@@ -71,6 +53,24 @@ namespace DashboardMerger {
                 }
                 OriginalDashboard.LayoutRoot = new DashboardLayoutGroup();
                 OriginalDashboard.LayoutRoot.ChildNodes.Add(layoutTabContainer);
+            }
+        }
+
+        void CreateTabContainer() {
+            TabContainer = new TabContainerDashboardItem();
+            OriginalDashboard.Items.Add(TabContainer);
+        }
+        void MoveRootToTabPage(DashboardLayoutTabPage layoutPage) {
+            DashboardLayoutGroup rootGroup = OriginalDashboard.LayoutRoot;
+            OriginalDashboard.LayoutRoot = null;
+            layoutPage.ChildNodes.Add(rootGroup);
+        }
+        void SetParentContainer(IDashboardItemContainer container) {
+            foreach(DashboardItem item in ItemsAndGroups) {
+                if(item.ParentContainer == null) {
+                    if(!(item is TabContainerDashboardItem))
+                        item.ParentContainer = container;
+                }
             }
         }
     }

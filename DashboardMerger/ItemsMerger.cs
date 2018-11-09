@@ -10,34 +10,57 @@ namespace DashboardMerger {
             IDictionary<string, string> groupNamesMap = dashboardMerger.GroupNamesMap;
             IList<DashboardItem> newItems = dashboardMerger.NewItems;
             foreach(DashboardItemGroup group in fromGroups) {
-                DashboardItemGroup groupCopy = CreateGroupCopy(group);
-                if(toGroups.Any(g => g.ComponentName == group.ComponentName)) {
-                    string newName = NamesGenerator.GenerateName(group.ComponentName, 1, toGroups.Select(g => g.ComponentName));
-                    groupNamesMap.Add(group.ComponentName, newName);
-                    groupCopy.ComponentName = newName;
-                } else {
-                    groupCopy.ComponentName = group.ComponentName;
-                }
-                toGroups.Add(groupCopy);
-                newItems.Add(groupCopy);
+                AddGroupCopy(group, dashboardMerger, (groupCopy) => {
+                    toGroups.Add(groupCopy);
+                    newItems.Add(groupCopy);
+                });
             }
         }
         public static void MergeItems(DashboardItemCollection fromItems, DashboardMerger dashboardMerger) {
             DashboardItemCollection toItems = dashboardMerger.OriginalDashboard.Items;
-            IDictionary<string, string> dashboardItemNamesMap = dashboardMerger.DashboardItemNamesMap;
-            IDictionary<string, string> dataSourceNamesMap = dashboardMerger.DataSourceNamesMap;
-            DataSourceCollection existingDataSources = dashboardMerger.OriginalDashboard.DataSources;
             IList<DashboardItem> newItems = dashboardMerger.NewItems;
 
             foreach(DashboardItem dashboardItem in fromItems) {
-                DashboardItem dashboardItemCopy = dashboardItem.CreateCopy();
-                if(toItems.Any(item => item.ComponentName == dashboardItem.ComponentName)) {
-                    string newName = NamesGenerator.GenerateName(dashboardItem.ComponentName, 1, toItems.Select(item => item.ComponentName));
-                    dashboardItemNamesMap.Add(dashboardItem.ComponentName, newName);
-                    dashboardItemCopy.ComponentName = newName;
-                } else {
-                    dashboardItemCopy.ComponentName = dashboardItem.ComponentName;
-                }
+                AddItemCopy(dashboardItem, dashboardMerger, (dashboardItemCopy) => {
+                    toItems.Add(dashboardItemCopy);
+                    newItems.Add(dashboardItemCopy);
+                });
+            }
+        }
+        static void AddGroupCopy(DashboardItemGroup originalGroup, DashboardMerger dashboardMerger, Action<DashboardItemGroup> addGroupDelegate) {
+            DashboardItemGroupCollection toGroups = dashboardMerger.OriginalDashboard.Groups;
+            DashboardItemGroup groupCopy = CreateGroupCopy(originalGroup);
+            if(toGroups.Any(g => g.ComponentName == originalGroup.ComponentName)) {
+                if(ResolveGroupNamesConflict(groupCopy, originalGroup.ComponentName, toGroups, dashboardMerger.GroupNamesMap))
+                    addGroupDelegate(groupCopy);
+            } else {
+                addGroupDelegate(groupCopy);
+            }
+        }
+        static bool ResolveGroupNamesConflict(DashboardItemGroup groupCopy, string originalGroupName, IEnumerable<DashboardItem> toGroups, IDictionary<string, string> groupNamesMap) {
+            
+            // Provide your group component name confilict resolution logic here
+
+            string newName = NamesGenerator.GenerateName(originalGroupName, 1, toGroups.Select(g => g.ComponentName));
+            groupNamesMap.Add(originalGroupName, newName);
+            groupCopy.ComponentName = newName;
+            return true;
+        }
+        static void AddItemCopy(DashboardItem originalItem, DashboardMerger dashboardMerger, Action<DashboardItem> addItemDelegate) {
+            DashboardItemCollection toItems = dashboardMerger.OriginalDashboard.Items;
+            IDictionary<string, string> dataSourceNamesMap = dashboardMerger.DataSourceNamesMap;
+            DataSourceCollection existingDataSources = dashboardMerger.OriginalDashboard.DataSources;
+            DashboardItem dashboardItemCopy = originalItem.CreateCopy();
+
+            bool shouldAddItem = false;
+            if(toItems.Any(item => item.ComponentName == originalItem.ComponentName)) {
+                if(ResolveDashboardItemNameConflict(dashboardItemCopy, originalItem.ComponentName, toItems, dashboardMerger.DashboardItemNamesMap))
+                    shouldAddItem = true;
+            } else {
+                dashboardItemCopy.ComponentName = originalItem.ComponentName;
+                shouldAddItem = true;
+            }
+            if(shouldAddItem) {
                 DataDashboardItem dataDashboardItem = dashboardItemCopy as DataDashboardItem;
                 if(dataDashboardItem != null && dataDashboardItem.DataSource != null) {
                     string newDataSourceName = String.Empty;
@@ -47,13 +70,19 @@ namespace DashboardMerger {
                         newDataSourceName = dataDashboardItem.DataSource.ComponentName;
                     }
                     dataDashboardItem.DataSource = null;
-                    toItems.Add(dashboardItemCopy);
                     dataDashboardItem.DataSource = existingDataSources[newDataSourceName];
-                } else {
-                    toItems.Add(dashboardItemCopy);
                 }
-                newItems.Add(dashboardItemCopy);
+                addItemDelegate(dashboardItemCopy);
             }
+        }
+        static bool ResolveDashboardItemNameConflict(DashboardItem dashboardItemCopy, string originalItemName, DashboardItemCollection toItems, IDictionary<string, string> dashboardItemNamesMap) {
+
+            // Provide your item component name confilict resolution logic here
+
+            string newName = NamesGenerator.GenerateName(originalItemName, 1, toItems.Select(item => item.ComponentName));
+            dashboardItemNamesMap.Add(originalItemName, newName);
+            dashboardItemCopy.ComponentName = newName;
+            return true;
         }
         static DashboardItemGroup CreateGroupCopy(DashboardItemGroup group) {
             DashboardItemGroup groupCopy = new DashboardItemGroup();
