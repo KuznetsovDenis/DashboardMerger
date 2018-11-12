@@ -46,7 +46,6 @@ namespace DashboardMerger {
                 XElement element = efDataSource.SaveToXml();
                 DashboardEFDataSource newDataSource = new DashboardEFDataSource();
                 newDataSource.LoadFromXml(element);
-                newDataSource.Fill();
                 return newDataSource;
             }
 
@@ -55,7 +54,6 @@ namespace DashboardMerger {
                 XElement element = excelDataSource.SaveToXml();
                 DashboardExcelDataSource newDataSource = new DashboardExcelDataSource();
                 newDataSource.LoadFromXml(element);
-                newDataSource.Fill();
                 return newDataSource;
             }
 
@@ -72,7 +70,6 @@ namespace DashboardMerger {
                 XElement element = objectDataSource.SaveToXml();
                 DashboardObjectDataSource newDataSource = new DashboardObjectDataSource();
                 newDataSource.LoadFromXml(element);
-                newDataSource.Fill();
                 return newDataSource;
             }
 
@@ -90,7 +87,6 @@ namespace DashboardMerger {
                 XElement element = sqlDataSource.SaveToXml();
                 DashboardSqlDataSource newDataSource = new DashboardSqlDataSource();
                 newDataSource.LoadFromXml(element);
-                newDataSource.Fill();
                 return newDataSource;
             }
             return null;
