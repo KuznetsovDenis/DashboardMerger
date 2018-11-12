@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Resources;
 using System.Windows.Forms;
 using DevExpress.DashboardCommon;
 using DevExpress.DashboardWin;
+using DevExpress.Utils.Svg;
 using DevExpress.XtraEditors;
 
 namespace DashboardMerger {
@@ -50,7 +52,9 @@ namespace DashboardMerger {
 
         void DashboardDesignerCustomizeDashboardTitle(object sender, CustomizeDashboardTitleEventArgs e) {
             DashboardToolbarItem mergeItem = new DashboardToolbarItem("Open Dashboard to merge", MergeDashboard);
-            e.Items.Add(mergeItem);
+            mergeItem.SvgImage = (SvgImage)Properties.Resources.MergeIcon;
+            mergeItem.Caption = "Merge Dashboard";
+            e.Items.Insert(0, mergeItem);
         }
     }
 }
