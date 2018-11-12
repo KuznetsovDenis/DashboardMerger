@@ -7,7 +7,6 @@ namespace DashboardMerger {
     public static class ItemsMerger {
         public static void MergeGroups(DashboardItemGroupCollection fromGroups, DashboardMerger dashboardMerger) {
             DashboardItemGroupCollection toGroups = dashboardMerger.OriginalDashboard.Groups;
-            IDictionary<string, string> groupNamesMap = dashboardMerger.GroupNamesMap;
             IList<DashboardItem> newItems = dashboardMerger.NewItems;
             foreach(DashboardItemGroup group in fromGroups) {
                 AddGroupCopy(group, dashboardMerger, (groupCopy) => {
@@ -64,12 +63,9 @@ namespace DashboardMerger {
                 DataDashboardItem dataDashboardItem = dashboardItemCopy as DataDashboardItem;
                 if(dataDashboardItem != null && dataDashboardItem.DataSource != null) {
                     string newDataSourceName = String.Empty;
-                    if(dataSourceNamesMap.Keys.Any(name => name == dataDashboardItem.DataSource.ComponentName)) {
-                        newDataSourceName = dataSourceNamesMap[dataDashboardItem.DataSource.ComponentName];
-                    } else {
+                    if(!dataSourceNamesMap.TryGetValue(dataDashboardItem.DataSource.ComponentName, out newDataSourceName)) {
                         newDataSourceName = dataDashboardItem.DataSource.ComponentName;
                     }
-                    dataDashboardItem.DataSource = null;
                     dataDashboardItem.DataSource = existingDataSources[newDataSourceName];
                 }
                 addItemDelegate(dashboardItemCopy);

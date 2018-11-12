@@ -37,9 +37,8 @@
             this.dashboardDesigner.Name = "dashboardDesigner";
             this.dashboardDesigner.Size = new System.Drawing.Size(962, 584);
             this.dashboardDesigner.TabIndex = 0;
-            this.dashboardDesigner.DashboardChanged += new System.EventHandler(this.dashboardDesignerDashboardChanged);
-            this.dashboardDesigner.DataLoading += new DevExpress.DashboardCommon.DataLoadingEventHandler(this.dashboardDesignerDataLoading);
-            this.dashboardDesigner.CustomizeDashboardTitle += new DevExpress.DashboardWin.CustomizeDashboardTitleEventHandler(this.dashboardDesignerCustomizeDashboardTitle);
+            this.dashboardDesigner.CustomizeDashboardTitle += new DevExpress.DashboardWin.CustomizeDashboardTitleEventHandler(this.DashboardDesignerCustomizeDashboardTitle);
+            this.dashboardDesigner.DashboardClosing += new DevExpress.DashboardWin.DashboardClosingEventHandler(this.DashboardDesignerDashboardClosing);
             // 
             // DesignerForm
             // 

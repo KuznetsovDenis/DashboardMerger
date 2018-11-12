@@ -8,17 +8,13 @@ using DevExpress.XtraEditors;
 
 namespace DashboardMerger {
     public partial class DesignerForm : XtraForm {
+        bool dashboardChanged = false;
         public DesignerForm() {
             InitializeComponent();
-            AppDomain.CurrentDomain.SetData("DataDirectory", @"c:\Sources\vcs\2018.2\Demos.Dashboard\MVCxDashboard\CSHTML\App_Data");
             dashboardDesigner.CreateRibbon();
             dashboardDesigner.UpdateDashboardTitle();
         }
 
-        void dashboardDesignerCustomizeDashboardTitle(object sender, CustomizeDashboardTitleEventArgs e) {
-            DashboardToolbarItem mergeItem = new DashboardToolbarItem("Open Dashboard to merge", MergeDashboard);
-            e.Items.Add(mergeItem);
-        }
         void MergeDashboard(DashboardToolbarItemClickEventArgs args) {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Dashboard files (*.xml)|*.xml";
@@ -38,6 +34,8 @@ namespace DashboardMerger {
                     }
                     if(rejectedDashboard.Count > 0)
                         MessageBox.Show(String.Format("The following dashboard has not been merged{0}{1}", Environment.NewLine, String.Join(Environment.NewLine, rejectedDashboard)));
+                    if((openFileDialog.FileNames.Length - rejectedDashboard.Count) > 0)
+                        dashboardChanged = true;
                 } finally {
                     dashboardDesigner.Dashboard.EndUpdate();
                     dashboardDesigner.ReloadData();
@@ -45,11 +43,14 @@ namespace DashboardMerger {
             }
         }
 
-        void dashboardDesignerDashboardChanged(object sender, EventArgs e) {
+        void DashboardDesignerDashboardClosing(object sender, DashboardClosingEventArgs e) {
+            if(dashboardChanged)
+                e.IsDashboardModified = true;
         }
 
-        void dashboardDesignerDataLoading(object sender, DataLoadingEventArgs e) {
-
+        void DashboardDesignerCustomizeDashboardTitle(object sender, CustomizeDashboardTitleEventArgs e) {
+            DashboardToolbarItem mergeItem = new DashboardToolbarItem("Open Dashboard to merge", MergeDashboard);
+            e.Items.Add(mergeItem);
         }
     }
 }

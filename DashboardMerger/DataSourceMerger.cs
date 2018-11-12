@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using DevExpress.DashboardCommon;
@@ -7,20 +8,28 @@ namespace DashboardMerger {
     public static class DataSourceMerger {
         public static void MergeDataSources(DataSourceCollection fromDataSources, DashboardMerger dashboardMerger) {
             DataSourceCollection toDataSources = dashboardMerger.OriginalDashboard.DataSources;
-            IDictionary<string, string> dataSourceNamesMap = dashboardMerger.DataSourceNamesMap;
 
             foreach(IDashboardDataSource dataSource in fromDataSources) {
-                IDashboardDataSource dataSourceCopy = CreateDataSourceCopy(dataSource);
-                if(dataSourceCopy != null) {
-                    if(toDataSources.Any(d => d.ComponentName == dataSourceCopy.ComponentName)) {
-                        if(ResolveNamesConflict(dataSourceCopy, toDataSources, dataSourceNamesMap))
-                            toDataSources.Add(dataSourceCopy);
-                    } else {
-                        toDataSources.Add(dataSourceCopy);
-                    }
+                AddDataSourceCopy(dataSource, dashboardMerger, (dataSourceCopy) => {
+                    toDataSources.Add(dataSourceCopy);
+                });
+            }
+        }
+
+        static void AddDataSourceCopy(IDashboardDataSource dataSource, DashboardMerger dashboardMerger, Action<IDashboardDataSource> addDataSourceDelegate) {
+            DataSourceCollection toDataSources = dashboardMerger.OriginalDashboard.DataSources;
+            IDictionary<string, string> dataSourceNamesMap = dashboardMerger.DataSourceNamesMap;
+            IDashboardDataSource dataSourceCopy = CreateDataSourceCopy(dataSource);
+            if(dataSourceCopy != null) {
+                if(toDataSources.Any(d => d.ComponentName == dataSourceCopy.ComponentName)) {
+                    if(ResolveNamesConflict(dataSourceCopy, toDataSources, dataSourceNamesMap))
+                        addDataSourceDelegate(dataSourceCopy);
+                } else {
+                    addDataSourceDelegate(dataSourceCopy);
                 }
             }
         }
+
         static bool ResolveNamesConflict(IDashboardDataSource dataSourceCopy, DataSourceCollection toDataSources, IDictionary<string, string> dataSourceNamesMap) {
             
             // Provide your data source component names confilict resolution logic here
@@ -30,6 +39,7 @@ namespace DashboardMerger {
             dataSourceCopy.ComponentName = newName;
             return true;
         }
+
         static IDashboardDataSource CreateDataSourceCopy(IDashboardDataSource dataSourceToCopy) {
             DashboardEFDataSource efDataSource = dataSourceToCopy as DashboardEFDataSource;
             if(efDataSource != null) {
